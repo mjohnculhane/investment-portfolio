@@ -27,10 +27,13 @@ function App() {
     btcAmount: '',
     btcPrice: '',
   });
+  const [showBtcForm, setShowBtcForm] = useState(false);
 
   const [cashFormData, setCashFormData] = useState({
     cash: '',
   });
+  const [showCashForm, setShowCashForm] = useState(false);
+
 
   const formatNumber = (num) => {
     return Number(num).toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 });
@@ -41,7 +44,6 @@ function App() {
     realEstate: '#60A5FA',
     bitcoin: '#FF9900',
     cash: '#22C55E',
-    grey: '#B0B0B0',
   };
 
   const calculatePortfolioValue = () => {
@@ -60,10 +62,10 @@ function App() {
     datasets: [{
       data: [stocksValue, realEstateValue, btcValue, cashValue].map(value => value > 0 ? value : 1),
       backgroundColor: [
-        stocksValue > 0 ? colors.stocks : colors.grey,
-        realEstateValue > 0 ? colors.realEstate : colors.grey,
-        btcValue > 0 ? colors.bitcoin : colors.grey,
-        cashValue > 0 ? colors.cash : colors.grey
+        colors.stocks,
+        colors.realEstate,
+        colors.bitcoin,
+        colors.cash
       ],
     }],
   };
@@ -90,11 +92,18 @@ function App() {
   };
 
   // Delete asset from the portfolio
-  const deleteAsset = (category, index) => {
+  const deleteAsset = (category, index = null) => {
     if (category === 'stocks') {
       setStocks(stocks.filter((_, i) => i !== index));
     } else if (category === 'realEstate') {
       setRealEstate(realEstate.filter((_, i) => i !== index));
+    } else if (category === 'bitcoin') {
+      setBtcAmount(0);
+      setBtcPrice(0);
+      setShowBtcForm(false);
+    } else if (category === 'cash') {
+      setCash(0);
+      setShowCashForm(false);
     }
   };
 
@@ -126,7 +135,7 @@ function App() {
         <div className="breakdown">
           <h1 style={{ textAlign: 'center' }}>Total Portfolio Value - ${formatNumber(totalValue)}</h1>
           {/* Stocks Section */}
-          <div className="category" style={{ backgroundColor: stocksValue > 0 ? colors.stocks : colors.grey }}>
+          <div className="category" style={{ backgroundColor: colors.stocks }}>
             <h2 style={{ marginBottom: '1rem' }}>Stocks - ${formatNumber(stocksValue)}</h2>
             {stocks.map((stock, index) => (
               <div key={index} className="asset-container">
@@ -194,8 +203,8 @@ function App() {
           </div>
           
           {/* Real Estate Section */}
-          <div className="category" style={{ backgroundColor: realEstateValue > 0 ? colors.realEstate : colors.grey }}>
-            <h2>Real Estate - ${formatNumber(realEstateValue)}</h2>
+          <div className="category" style={{ backgroundColor: colors.realEstate}}>
+            <h2 style={{ marginBottom: '1rem' }}>Real Estate - ${formatNumber(realEstateValue)}</h2>
             {realEstate.map((property, index) => (
               <div key={index} className="asset-container">
                 <span onClick={() => deleteAsset('realEstate', index)}>
@@ -254,45 +263,120 @@ function App() {
           </div>
 
           {/* Bitcoin Section */}
-          <div className="category" style={{ backgroundColor: btcValue > 0 ? colors.bitcoin : colors.grey }}>
-            <h2>Bitcoin - ${formatNumber(btcValue)}</h2>
-            <p>{formatNumber(btcAmount)} BTC @ ${formatNumber(btcPrice)} each</p>
-            <div>
-              <input
-                type="number"
-                name="btcAmount"
-                placeholder="Quantity"
-                value={btcFormData.btcAmount || ''}
-                onChange={(e) => handleChange(e, 'bitcoin')}
-              />
-              <input
-                type="number"
-                name="btcPrice"
-                placeholder="Price"
-                value={btcFormData.btcPrice || ''}
-                onChange={(e) => handleChange(e, 'bitcoin')}
-              />
-              <button onClick={() => handleAssetSubmit('bitcoin')}>Add Bitcoin</button>
-            </div>
+          <div className="category" style={{ backgroundColor: colors.bitcoin }}>
+            <h2 style={{ marginBottom: '1rem' }}>Bitcoin - ${formatNumber(btcValue)}</h2>
+            {btcValue > 0 ? (
+              <div className="asset-container">
+                <span onClick={() => deleteAsset('bitcoin')}>
+                  <i className="fas fa-trash"></i> {/* Font Awesome trash icon */}
+                </span>
+                <p>{formatNumber(btcAmount)} BTC @ ${formatNumber(btcPrice)} each</p>
+              </div>
+            ) : (
+              <div
+                className="asset-container add-asset"
+                onClick={() => setShowBtcForm(true)}
+                style={{ cursor: 'pointer', fontSize: '1.5rem' }}
+              >
+                {!showBtcForm ? (
+                  <span>
+                    <i className="fas fa-plus-circle"></i> {/* "+" icon */}
+                  </span>
+                ) : (
+                  <div>
+                    <input
+                      type="number"
+                      name="btcAmount"
+                      placeholder="Quantity"
+                      value={btcFormData.btcAmount || ''}
+                      onChange={(e) => handleChange(e, 'bitcoin')}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAssetSubmit('bitcoin')}
+                    />
+                    <input
+                      type="number"
+                      name="btcPrice"
+                      placeholder="Price"
+                      value={btcFormData.btcPrice || ''}
+                      onChange={(e) => handleChange(e, 'bitcoin')}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAssetSubmit('bitcoin')}
+                    />
+                    <button
+                      onClick={() => {
+                        handleAssetSubmit('bitcoin');
+                        setShowBtcForm(false); // Hide form
+                      }}
+                    >
+                      Add Bitcoin
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent click on parent
+                        setShowBtcForm(false); // Cancel
+                      }}
+                      style={{ marginLeft: '0.5rem', backgroundColor: 'red', color: 'white' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Cash Section */}
-          <div className="category" style={{ backgroundColor: cashValue > 0 ? colors.cash : colors.grey }}>
-            <h2>Cash - ${formatNumber(cashValue)}</h2>
-            <p>{formatNumber(cash)} USD</p>
-            <div>
-              <input
-                type="number"
-                name="cash"
-                placeholder="Quantity"
-                value={cashFormData.cash || ''}
-                onChange={(e) => handleChange(e, 'cash')}
-              />
-              <button onClick={() => handleAssetSubmit('cash')}>Add Cash</button>
-            </div>
+          <div className="category" style={{ backgroundColor: colors.cash }}>
+            <h2 style={{ marginBottom: '1rem' }}>Cash - ${formatNumber(cash)}</h2>
+            {cash > 0 ? (
+              <div className="asset-container">
+                <span onClick={() => deleteAsset('cash')}>
+                  <i className="fas fa-trash"></i> {/* Font Awesome trash icon */}
+                </span>
+                <p>{formatNumber(cash)} USD</p>
+              </div>
+            ) : (
+              <div
+                className="asset-container add-asset"
+                onClick={() => setShowCashForm(true)}
+                style={{ cursor: 'pointer', fontSize: '1.5rem' }}
+              >
+                {!showCashForm ? (
+                  <span>
+                    <i className="fas fa-plus-circle"></i> {/* "+" icon */}
+                  </span>
+                ) : (
+                  <div>
+                    <input
+                      type="number"
+                      name="cash"
+                      placeholder="Quantity"
+                      value={cashFormData.cash || ''}
+                      onChange={(e) => handleChange(e, 'cash')}
+                      onKeyDown={(e) => e.key === 'Enter' && handleAssetSubmit('cash')}
+                    />
+                    <button
+                      onClick={() => {
+                        handleAssetSubmit('cash');
+                        setShowCashForm(false); // Hide form
+                      }}
+                    >
+                      Add Cash
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent click on parent
+                        setShowCashForm(false); // Cancel
+                      }}
+                      style={{ marginLeft: '0.5rem', backgroundColor: 'red', color: 'white' }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        </div>
 
+        </div>
         <div className="pie-chart">
           <Pie data={data} />
         </div>
