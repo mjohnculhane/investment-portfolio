@@ -15,27 +15,32 @@ function App() {
 
   // Form states for each category
   const [stocksFormData, setStocksFormData] = useState({});
+  const [showStockForm, setShowStockForm] = useState(false);
+
   const [realEstateFormData, setRealEstateFormData] = useState({
     name: '',
     marketValue: '',
   });
+  const [showRealEstateForm, setShowRealEstateForm] = useState(false);
+
   const [btcFormData, setBtcFormData] = useState({
     btcAmount: '',
     btcPrice: '',
   });
+
   const [cashFormData, setCashFormData] = useState({
     cash: '',
   });
 
   const formatNumber = (num) => {
-    return num.toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 });
+    return Number(num).toLocaleString('en-US', { style: 'decimal', maximumFractionDigits: 2 });
   };
 
   const colors = {
-    stocks: '#FF6384',
-    realEstate: '#36A2EB',
-    bitcoin: '#FFCE56',
-    cash: '#4CAF50',
+    stocks: '#D8B2FF',
+    realEstate: '#60A5FA',
+    bitcoin: '#FF9900',
+    cash: '#22C55E',
     grey: '#B0B0B0',
   };
 
@@ -68,10 +73,12 @@ function App() {
     if (category === 'stocks' && stocksFormData.name && stocksFormData.quantity && stocksFormData.price) {
       setStocks([...stocks, stocksFormData]);
       setStocksFormData({});
+      setShowStockForm(false); // Hide the form and show the plus icon
     } else if (category === 'realEstate' && realEstateFormData.name && realEstateFormData.marketValue) {
       const updatedRealEstate = { ...realEstateFormData, marketValue: parseFloat(realEstateFormData.marketValue) };
       setRealEstate([...realEstate, updatedRealEstate]);
       setRealEstateFormData({ name: '', marketValue: '' });
+      setShowRealEstateForm(false);
     } else if (category === 'bitcoin' && btcFormData.btcAmount && btcFormData.btcPrice) {
       setBtcAmount(btcFormData.btcAmount);
       setBtcPrice(btcFormData.btcPrice);
@@ -117,94 +124,151 @@ function App() {
       <h1>Investment Portfolio Tracker</h1>
       <div className="main-content">
         <div className="breakdown">
-          <h2>Total Portfolio Value: ${formatNumber(totalValue)}</h2>
-          <h3>Portfolio Breakdown:</h3>
-
+          <h1 style={{ textAlign: 'center' }}>Total Portfolio Value - ${formatNumber(totalValue)}</h1>
           {/* Stocks Section */}
           <div className="category" style={{ backgroundColor: stocksValue > 0 ? colors.stocks : colors.grey }}>
-            <h4>Stocks - ${formatNumber(stocksValue)}</h4>
+            <h2 style={{ marginBottom: '1rem' }}>Stocks - ${formatNumber(stocksValue)}</h2>
             {stocks.map((stock, index) => (
-              <div key={index}>
+              <div key={index} className="asset-container">
+                <span onClick={() => deleteAsset('stocks', index)}>
+                  <i className="fas fa-trash"></i> {/* Font Awesome trash icon */}
+                </span>
                 <p>{stock.name}: {formatNumber(stock.quantity)} shares @ ${formatNumber(stock.price)} each = ${formatNumber(stock.quantity * stock.price)}</p>
-                <button onClick={() => deleteAsset('stocks', index)}>Delete</button>
                 {/* Update price input */}
                 <input
                   type="number"
-                  placeholder="Update Price"
+                  placeholder="Price"
                   onChange={(e) => updateStockPrice(index, e.target.value)}
                 />
               </div>
             ))}
-            <div>
-              <input
-                type="text"
-                name="name"
-                placeholder="Stock Name"
-                value={stocksFormData.name || ''}
-                onChange={(e) => handleChange(e, 'stocks')}
-              />
-              <input
-                type="number"
-                name="quantity"
-                placeholder="Quantity"
-                value={stocksFormData.quantity || ''}
-                onChange={(e) => handleChange(e, 'stocks')}
-              />
-              <input
-                type="number"
-                name="price"
-                placeholder="Price"
-                value={stocksFormData.price || ''}
-                onChange={(e) => handleChange(e, 'stocks')}
-              />
-              <button onClick={() => handleAssetSubmit('stocks')}>Add Stock</button>
+            <div className="asset-container add-asset" onClick={() => setShowStockForm(true)} style={{ cursor: 'pointer', fontSize: '1.5rem' }}>
+              {!showStockForm ? (
+                <span>
+                  <i className="fas fa-plus-circle"></i> {/* Font Awesome "+" inside of circle icon */}
+                </span>
+              ) : (
+                <div>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    value={stocksFormData.name || ''}
+                    onChange={(e) => handleChange(e, 'stocks')}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAssetSubmit('stocks')}
+                  />
+                  <input
+                    type="number"
+                    name="quantity"
+                    placeholder="Quantity"
+                    value={stocksFormData.quantity || ''}
+                    onChange={(e) => handleChange(e, 'stocks')}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAssetSubmit('stocks')}
+                  />
+                  <input
+                    type="number"
+                    name="price"
+                    placeholder="Price"
+                    value={stocksFormData.price || ''}
+                    onChange={(e) => handleChange(e, 'stocks')}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAssetSubmit('stocks')}
+                  />
+                  <button onClick={() => {
+                    handleAssetSubmit('stocks');
+                    setShowStockForm(false); // Hide the form after submission
+                  }}>
+                    Add
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent onClick from triggering the parent container
+                      setShowStockForm(false); // Cancel and revert to the plus icon
+                    }}
+                    style={{ marginLeft: '1rem', backgroundColor: 'red', color: 'white' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-
+          
           {/* Real Estate Section */}
           <div className="category" style={{ backgroundColor: realEstateValue > 0 ? colors.realEstate : colors.grey }}>
-            <h4>Real Estate - ${formatNumber(realEstateValue)}</h4>
+            <h2>Real Estate - ${formatNumber(realEstateValue)}</h2>
             {realEstate.map((property, index) => (
-              <div key={index}>
+              <div key={index} className="asset-container">
+                <span onClick={() => deleteAsset('realEstate', index)}>
+                  <i className="fas fa-trash"></i> {/* Font Awesome trash icon */}
+                </span>
                 <p>{property.name}: ${formatNumber(property.marketValue)}</p>
-                <button onClick={() => deleteAsset('realEstate', index)}>Delete</button>
               </div>
             ))}
-            <div>
-              <input
-                type="text"
-                name="name"
-                placeholder="Property Name"
-                value={realEstateFormData.name || ''}
-                onChange={(e) => handleChange(e, 'realEstate')}
-              />
-              <input
-                type="number"
-                name="marketValue"
-                placeholder="Market Value"
-                value={realEstateFormData.marketValue || ''}
-                onChange={(e) => handleChange(e, 'realEstate')}
-              />
-              <button onClick={() => handleAssetSubmit('realEstate')}>Add Property</button>
+            <div
+              className="asset-container add-asset"
+              onClick={!showRealEstateForm ? () => setShowRealEstateForm(true) : undefined}
+              style={{ cursor: 'pointer', fontSize: '1.5rem' }}
+            >
+              {!showRealEstateForm ? (
+                <span>
+                  <i className="fas fa-plus-circle"></i> {/* Font Awesome "+" inside of circle icon */}
+                </span>
+              ) : (
+                <div>
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Name"
+                    value={realEstateFormData.name || ''}
+                    onChange={(e) => handleChange(e, 'realEstate')}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAssetSubmit('realEstate')}
+                  />
+                  <input
+                    type="number"
+                    name="marketValue"
+                    placeholder="Price"
+                    value={realEstateFormData.marketValue || ''}
+                    onChange={(e) => handleChange(e, 'realEstate')}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAssetSubmit('realEstate')}
+                  />
+                  <button
+                    onClick={() => {
+                      handleAssetSubmit('realEstate');
+                      setShowRealEstateForm(false); // Hide the form after submission
+                    }}
+                  >
+                    Add Property
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation(); // Prevent onClick from triggering the parent container
+                      setShowRealEstateForm(false); // Cancel and revert to the plus icon
+                    }}
+                    style={{ marginLeft: '0.5rem', backgroundColor: 'red', color: 'white' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Bitcoin Section */}
           <div className="category" style={{ backgroundColor: btcValue > 0 ? colors.bitcoin : colors.grey }}>
-            <h4>Bitcoin - ${formatNumber(btcValue)}</h4>
+            <h2>Bitcoin - ${formatNumber(btcValue)}</h2>
             <p>{formatNumber(btcAmount)} BTC @ ${formatNumber(btcPrice)} each</p>
             <div>
               <input
                 type="number"
                 name="btcAmount"
-                placeholder="BTC Amount"
+                placeholder="Quantity"
                 value={btcFormData.btcAmount || ''}
                 onChange={(e) => handleChange(e, 'bitcoin')}
               />
               <input
                 type="number"
                 name="btcPrice"
-                placeholder="BTC Price"
+                placeholder="Price"
                 value={btcFormData.btcPrice || ''}
                 onChange={(e) => handleChange(e, 'bitcoin')}
               />
@@ -214,13 +278,13 @@ function App() {
 
           {/* Cash Section */}
           <div className="category" style={{ backgroundColor: cashValue > 0 ? colors.cash : colors.grey }}>
-            <h4>Cash - ${formatNumber(cashValue)}</h4>
+            <h2>Cash - ${formatNumber(cashValue)}</h2>
             <p>{formatNumber(cash)} USD</p>
             <div>
               <input
                 type="number"
                 name="cash"
-                placeholder="Cash Amount"
+                placeholder="Quantity"
                 value={cashFormData.cash || ''}
                 onChange={(e) => handleChange(e, 'cash')}
               />
