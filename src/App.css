@@ -1,0 +1,69 @@
+.App {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem; /* Using rem for consistent spacing */
+}
+
+.main-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 3rem; /* rem for vertical spacing */
+}
+
+.pie-chart {
+  flex: 2;
+  max-width: 40vw; /* Relative to the viewport width */
+  padding: 1rem; /* rem for consistent padding */
+}
+
+.breakdown {
+  display: flex;
+  flex-direction: column;
+  width: 45%; /* Percentage for responsive width */
+  padding: 2rem;
+  background-color: #f9f9f9;
+  border-radius: 0.5rem; /* rem for consistent rounding */
+}
+
+.category {
+  margin: 1rem 0; /* rem for vertical spacing */
+  padding: 1rem;
+  border-radius: 0.3rem; /* rem for subtle rounding */
+}
+
+.category h4 {
+  margin: 0;
+  padding: 0;
+}
+
+.category-toggle {
+  margin: 2rem 0; /* rem for spacing */
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 0.7rem; /* rem for consistent padding */
+  border: none;
+  cursor: pointer;
+  margin: 0 1rem; /* rem for horizontal spacing */
+  border-radius: 0.3rem; /* rem for subtle rounding */
+  font-size: 1rem; /* rem for font size consistency */
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+input {
+  margin-right: 1rem; /* rem for spacing */
+  padding: 0.5rem; /* rem for consistent padding */
+  width: 80%; /* Percentage for adaptable width */
+}
+
+input[type="number"] {
+  width: 60%; /* Adjusted for numeric inputs */
+}
