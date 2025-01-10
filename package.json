@@ -5,6 +5,7 @@
   "dependencies": {
     "chart.js": "^4.4.7",
     "cra-template": "1.2.0",
+    "d3": "^7.9.0",
     "font-awesome": "^4.7.0",
     "rc-slider": "^11.1.8",
     "react": "^19.0.0",

@@ -3,6 +3,7 @@ import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css'; // Make sure to import the styles
+import { scaleLog } from 'd3-scale';
 import './App.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -59,7 +60,7 @@ function App() {
   };
 
   const { totalValue, stocksValue, realEstateValue, btcValue, cashValue } = calculatePortfolioValue();
-  const data = {
+  const pieData = {
     labels: ['Stocks', 'Real Estate', 'Bitcoin', 'Cash'],
     datasets: [{
       data: [stocksValue, realEstateValue, btcValue, cashValue].map(value => value > 0 ? value : 1),
@@ -146,6 +147,35 @@ function App() {
       return !prevMode;
     });
   };
+
+  const handleSliderChange = (value) => {
+    setSliderValue(value);
+    let adjustedSliderValue = getLogScaledValue(value)
+    let newSimulatedPrice = btcPrice * adjustedSliderValue;
+    console.log("original slide value" + value);
+    console.log("adjusted slide value" + adjustedSliderValue);
+    console.log("new simulation price" + newSimulatedPrice);
+    setSimulatedBtc({ amount: btcAmount, price: newSimulatedPrice });
+  };
+
+  const getLogScaledValue = (value) => {
+    if (value >= 1 && value <= 100) {
+      // Smooth curve from 0.01 to 0.1 (log scale)
+      return Math.pow(10, (value - 1) / 99 * Math.log10(0.1 / 0.01) + Math.log10(0.01));
+    } else if (value >= 101 && value <= 200) {
+      // Smooth curve from 0.2 to 1 (log scale)
+      return Math.pow(10, (value - 101) / 99 * Math.log10(1 / 0.2) + Math.log10(0.2));
+    } else if (value >= 201 && value <= 300) {
+      // Smooth curve from 2 to 10 (log scale)
+      return Math.pow(10, (value - 201) / 99 * Math.log10(10 / 2) + Math.log10(2));
+    } else if (value >= 301 && value <= 400) {
+      // Smooth curve from 11 to 100 (log scale)
+      return Math.pow(10, (value - 301) / 99 * Math.log10(100 / 11) + Math.log10(11));
+    } else {
+      return 0;
+    }
+  };
+
 
   return (
     <div className="App">
@@ -405,22 +435,41 @@ function App() {
           <div className="simulated-bitcoin-display">
             <h2>Bitcoin in Simulation</h2>
             <p>{formatNumber(simulatedBtc.amount)} BTC @ ${formatNumber(simulatedBtc.price)} each</p>
-            <label htmlFor="btcPriceSlider">BTC Price Multiplier (0 - 100x): </label>
+            <p>Adjusted BTC Price: ${formatNumber(simulatedBtc.price)}</p>
             <div className="btc-slider">
-              <input
-                id="btcPriceSlider"
-                type="range"
-                min="0"
-                max="100"
-                value={sliderValue}
-                onChange={(e) => {
-                  const newValue = e.target.value;
-                  setSliderValue(newValue);
-                  // Update btcPrice based on slider value
-                  setBtcPrice(btcAmount * (btcPrice * newValue / 100)); // Adjust price based on multiplier
-                }}
-              />
-              <p>Adjusted BTC Price: ${formatNumber(btcPrice)}</p>
+            <Slider
+              // min={0}
+              min={0}
+              max={400}
+              value={sliderValue}
+              step={1}
+              onChange={(newValue) => {
+                setSliderValue(newValue);
+                // const adjustedValue = logScaleValue(newValue);
+                // setBtcPrice(btcAmount * (btcPrice * adjustedValue)); // Adjust price based on the transformed value
+                handleSliderChange(newValue);
+              }}
+              handle={{
+                style: {
+                  backgroundColor: 'red',
+                  borderColor: 'red',
+                  height: '1.25em',
+                  width: '1.25em',
+                },
+              }}
+              track={{
+                style: {
+                  backgroundColor: 'blue',
+                  height: '0.3em',
+                },
+              }}
+              rail={{
+                style: {
+                  backgroundColor: 'gray',
+                  height: '0.3em',
+                },
+              }}
+            />
             </div>
           </div>
         ) : (
@@ -429,7 +478,7 @@ function App() {
           </div>
         )}
         <div className="pie-chart">
-          <Pie data={data} />
+          <Pie data={pieData} />
         </div>
       </div>
     </div>
