@@ -1,5 +1,6 @@
 .App {
   font-family: Arial, sans-serif;
+  font-size: 1rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -73,6 +74,7 @@ button:hover {
 
 .asset-container {
   display: flex;
+  font-size: 1rem;
   align-items: center; /* Vertically align items */
   gap: 1rem; /* Optional: adds space between the <p> and <button> */
   padding: 0.5rem; /* Adds padding inside the border */
@@ -97,6 +99,7 @@ button:hover {
 }
 
 .asset-container p {
+  font-size: 1rem;
   flex-grow: 1; /* Makes the <p> element take up available space */
   text-align: center; /* Centers the text horizontally */
   margin: 0; /* Removes default margin */
@@ -119,5 +122,38 @@ input[type="number"] {
 
 .add-asset:hover {
   background-color: #f5f5f5;
+}
+
+/* Simulation Components */
+.simulation-toggle-button {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.simulation-toggle-button button {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(to right, lightcoral, lightgreen); /* Lighter red and green */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.simulation-toggle-button button:hover {
+  background: linear-gradient(to right, red, rgb(108, 197, 108));
+}
+
+.btc-slider {
+  display: flex;
+  align-items: center;
+  margin: 1rem;
+  width: 100%; /* Ensures the slider takes up the full width of its container */
+}
+
+.btc-slider input[type="range"] {
+  width: 80%; /* Sets the slider width to 80% of its container */
+  max-width: 600px; /* Optional, limits the maximum width */
 }
 

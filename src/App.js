@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css'; // Make sure to import the styles
 import './App.css';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -126,6 +128,23 @@ function App() {
     } else if (category === 'cash') {
       setCashFormData({ ...cashFormData, [name]: value });
     }
+  };
+
+  // Simulation mode components
+  const [inSimulationMode, setInSimulationMode] = useState(false);
+
+  const [simulatedBtc, setSimulatedBtc] = useState({ amount: 0, price: 0 });
+
+  const [sliderValue, setSliderValue] = useState(100);
+
+  const handleSimulationToggle = () => {
+    setInSimulationMode((prevMode) => {
+      if (!prevMode) {
+        // Capture Bitcoin details when entering simulation mode
+        setSimulatedBtc({ amount: btcAmount, price: btcPrice });
+      }
+      return !prevMode;
+    });
   };
 
   return (
@@ -377,6 +396,38 @@ function App() {
           </div>
 
         </div>
+        <div className="simulation-toggle-button">
+          <button onClick={() => handleSimulationToggle(prevMode => !prevMode)}>
+            {inSimulationMode ? 'Exit Simulation' : 'Simulation Mode'}
+          </button>
+        </div>
+        {inSimulationMode ? (
+          <div className="simulated-bitcoin-display">
+            <h2>Bitcoin in Simulation</h2>
+            <p>{formatNumber(simulatedBtc.amount)} BTC @ ${formatNumber(simulatedBtc.price)} each</p>
+            <label htmlFor="btcPriceSlider">BTC Price Multiplier (0 - 100x): </label>
+            <div className="btc-slider">
+              <input
+                id="btcPriceSlider"
+                type="range"
+                min="0"
+                max="100"
+                value={sliderValue}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  setSliderValue(newValue);
+                  // Update btcPrice based on slider value
+                  setBtcPrice(btcAmount * (btcPrice * newValue / 100)); // Adjust price based on multiplier
+                }}
+              />
+              <p>Adjusted BTC Price: ${formatNumber(btcPrice)}</p>
+            </div>
+          </div>
+        ) : (
+          <div className="main-content">
+            {/* Full portfolio goes here (stocks, real estate, etc.) */}
+          </div>
+        )}
         <div className="pie-chart">
           <Pie data={data} />
         </div>
