@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 import Slider from 'rc-slider';
@@ -15,6 +15,9 @@ function App() {
   const [btcPrice, setBtcPrice] = useState(0);
   const [cash, setCash] = useState(0);
   const [yieldRate, setYieldRate] = useState(0);
+
+  // References for input fields
+  const btcAmountRef = useRef(null);
 
   // Form states for each category
   const [stocksFormData, setStocksFormData] = useState({});
@@ -72,6 +75,18 @@ function App() {
       ],
     }],
   };
+
+  // Trigger this function when the "+" button is clicked
+  const handleClick = () => {
+    setShowBtcForm(true);  // Show the form
+  };
+
+  // UseEffect hook to focus the input field when the form is shown
+  useEffect(() => {
+    if (showBtcForm && btcAmountRef.current) {
+      btcAmountRef.current.focus();  // Focus the input field after it's rendered
+    }
+  }, [showBtcForm]);  // This effect runs when `showBtcForm` changes
 
   // Form submission function
   const handleAssetSubmit = (category) => {
@@ -324,7 +339,7 @@ function App() {
             ) : (
               <div
                 className="asset-container add-asset"
-                onClick={() => setShowBtcForm(true)}
+                onClick={handleClick}
                 style={{ cursor: 'pointer', fontSize: '1.5rem' }}
               >
                 {!showBtcForm ? (
@@ -334,6 +349,7 @@ function App() {
                 ) : (
                   <div>
                     <input
+                      ref={btcAmountRef}
                       type="number"
                       name="btcAmount"
                       placeholder="Quantity"
