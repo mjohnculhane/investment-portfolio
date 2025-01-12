@@ -17,7 +17,11 @@ function App() {
   const [yieldRate, setYieldRate] = useState(0);
 
   // References for input fields
+  const stockNameRef = useRef(null);
+  const realEstateNameRef = useRef(null);
   const btcAmountRef = useRef(null);
+  const cashRef = useRef(null);
+
 
   // Form states for each category
   const [stocksFormData, setStocksFormData] = useState({});
@@ -77,16 +81,50 @@ function App() {
   };
 
   // Trigger this function when the "+" button is clicked
-  const handleClick = () => {
-    setShowBtcForm(true);  // Show the form
+  const handleClick = (e, type) => {
+    e.preventDefault();
+    switch (type) {
+      case 'stocks':
+        setShowStockForm(true);
+        break;
+      case 'realEstate':
+        setShowRealEstateForm(true);
+        break;
+      case 'bitcoin':
+        setShowBtcForm(true);
+        break;
+      case 'cash':
+        setShowCashForm(true);
+        break;
+      default:
+        console.error('Invalid type:', type);
+    }
   };
 
-  // UseEffect hook to focus the input field when the form is shown
+  // UseEffect hooks to focus the input fields when the add asset forms are shown
+  useEffect(() => {
+    if (showStockForm && stockNameRef.current) {
+      stockNameRef.current.focus(); // Focus the input field after it's rendered
+    }
+  }, [showStockForm]); // This effect runs when `showStockForm` changes
+
+  useEffect(() => {
+    if (showRealEstateForm && realEstateNameRef.current) {
+      realEstateNameRef.current.focus();
+    }
+  }, [showRealEstateForm]);
+
   useEffect(() => {
     if (showBtcForm && btcAmountRef.current) {
-      btcAmountRef.current.focus();  // Focus the input field after it's rendered
+      btcAmountRef.current.focus();
     }
-  }, [showBtcForm]);  // This effect runs when `showBtcForm` changes
+  }, [showBtcForm]);
+
+  useEffect(() => {
+    if (showCashForm && cashRef.current) {
+      cashRef.current.focus();
+    }
+  }, [showCashForm]);
 
   // Form submission function
   const handleAssetSubmit = (category) => {
@@ -215,7 +253,15 @@ function App() {
                 />
               </div>
             ))}
-            <div className="asset-container add-asset" onClick={() => setShowStockForm(true)} style={{ cursor: 'pointer', fontSize: '1.5rem' }}>
+            <div 
+              className="asset-container add-asset" 
+              onClick={(e) => handleClick(e, 'stocks')}
+              // onClick={() => setShowStockForm(true)}
+              style={{ 
+                cursor: 'pointer', 
+                fontSize: '1.5rem' 
+              }}
+            >
               {!showStockForm ? (
                 <span>
                   <i className="fas fa-plus-circle"></i> {/* Font Awesome "+" inside of circle icon */}
@@ -223,6 +269,7 @@ function App() {
               ) : (
                 <div>
                   <input
+                    ref={stockNameRef}
                     type="text"
                     name="name"
                     placeholder="Name"
@@ -279,7 +326,8 @@ function App() {
             ))}
             <div
               className="asset-container add-asset"
-              onClick={!showRealEstateForm ? () => setShowRealEstateForm(true) : undefined}
+              onClick={(e) => handleClick(e, 'realEstate')}
+              // onClick={!showRealEstateForm ? () => setShowRealEstateForm(true) : undefined}
               style={{ cursor: 'pointer', fontSize: '1.5rem' }}
             >
               {!showRealEstateForm ? (
@@ -289,6 +337,7 @@ function App() {
               ) : (
                 <div>
                   <input
+                    ref={realEstateNameRef}
                     type="text"
                     name="name"
                     placeholder="Name"
@@ -339,7 +388,7 @@ function App() {
             ) : (
               <div
                 className="asset-container add-asset"
-                onClick={handleClick}
+                onClick={(e) => handleClick(e, 'bitcoin')}
                 style={{ cursor: 'pointer', fontSize: '1.5rem' }}
               >
                 {!showBtcForm ? (
@@ -401,7 +450,8 @@ function App() {
             ) : (
               <div
                 className="asset-container add-asset"
-                onClick={() => setShowCashForm(true)}
+                // onClick={() => setShowCashForm(true)}
+                onClick={(e) => handleClick(e, 'cash')}
                 style={{ cursor: 'pointer', fontSize: '1.5rem' }}
               >
                 {!showCashForm ? (
@@ -411,6 +461,7 @@ function App() {
                 ) : (
                   <div>
                     <input
+                      ref={cashRef}
                       type="number"
                       name="cash"
                       placeholder="Quantity"
