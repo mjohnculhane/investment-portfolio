@@ -20,6 +20,11 @@
   padding: 1rem; /* rem for consistent padding */
 }
 
+.pie-chart h1 {
+  margin-bottom: 1rem; /* Space between the header and the pie chart */
+  text-align: center; /* Ensure the header is centered */
+}
+
 .breakdown {
   display: flex;
   flex-direction: column;
@@ -145,7 +150,7 @@ input[type="number"] {
   background: linear-gradient(to right, red, rgb(108, 197, 108));
 }
 
-.btc-slider {
+.simulation-slider {
   display: flex;
   align-items: center;
   margin: 1rem;

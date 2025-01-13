@@ -9,12 +9,18 @@ import './App.css';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function App() {
+  // Real portfolio variables
   const [stocks, setStocks] = useState([]);
   const [realEstate, setRealEstate] = useState([]);
   const [btcAmount, setBtcAmount] = useState(0);
   const [btcPrice, setBtcPrice] = useState(0);
   const [cash, setCash] = useState(0);
   const [yieldRate, setYieldRate] = useState(0);
+
+  // Simulation portfolio variables
+  const [inSimulationMode, setInSimulationMode] = useState(false);
+  const [simulatedBtc, setSimulatedBtc] = useState({ amount: 0, price: 0 });
+  const [sliderValue, setSliderValue] = useState(100);
 
   // References for input fields
   const stockNameRef = useRef(null);
@@ -59,8 +65,17 @@ function App() {
   const calculatePortfolioValue = () => {
     let stocksValue = stocks.reduce((total, stock) => total + stock.quantity * stock.price, 0);
     let realEstateValue = realEstate.reduce((total, property) => total + property.marketValue, 0);
-    let btcValue = btcAmount * btcPrice;
+    // let btcValue = btcAmount * btcPrice;
+    let btcValue = inSimulationMode ? simulatedBtc.amount * simulatedBtc.price : btcAmount * btcPrice;
     let cashValue = cash * (1 + yieldRate / 100);
+
+    // if (inSimulationMode) {
+    //   // Perform the simulation-specific calculation for Bitcoin
+    //   btcValue = simulatedBtc.amount * simulatedBtc.price; // Adjust based on the simulated values
+    // } else {
+    //   // Regular Bitcoin calculation
+    //   btcValue = btcAmount * btcPrice;
+    // }
 
     let totalValue = stocksValue + realEstateValue + btcValue + cashValue;
     return { totalValue, stocksValue, realEstateValue, btcValue, cashValue };
@@ -184,13 +199,7 @@ function App() {
     }
   };
 
-  // Simulation mode components
-  const [inSimulationMode, setInSimulationMode] = useState(false);
-
-  const [simulatedBtc, setSimulatedBtc] = useState({ amount: 0, price: 0 });
-
-  const [sliderValue, setSliderValue] = useState(100);
-
+  // Simulation mode functions
   const handleSimulationToggle = () => {
     setInSimulationMode((prevMode) => {
       if (!prevMode) {
@@ -235,10 +244,10 @@ function App() {
       <h1>Investment Portfolio Tracker</h1>
       <div className="main-content">
         <div className="breakdown">
-          <h1 style={{ textAlign: 'center' }}>Total Portfolio Value - ${formatNumber(totalValue)}</h1>
+          <h1 style={{ textAlign: 'center' }}>{inSimulationMode ? `Simulated Portfolio Value - $${formatNumber(totalValue)}` : `Actual Portfolio Value - $${formatNumber(totalValue)}`}</h1>
           {/* Stocks Section */}
           <div className="category" style={{ backgroundColor: colors.stocks }}>
-            <h2 style={{ marginBottom: '1rem' }}>Stocks - ${formatNumber(stocksValue)}</h2>
+            <h2 style={{ marginBottom: '1rem' }}>Stocks Value - ${formatNumber(stocksValue)}</h2>
             {stocks.map((stock, index) => (
               <div key={index} className="asset-container">
                 <span onClick={() => deleteAsset('stocks', index)}>
@@ -315,7 +324,7 @@ function App() {
           
           {/* Real Estate Section */}
           <div className="category" style={{ backgroundColor: colors.realEstate}}>
-            <h2 style={{ marginBottom: '1rem' }}>Real Estate - ${formatNumber(realEstateValue)}</h2>
+            <h2 style={{ marginBottom: '1rem' }}>Real Estate Value - ${formatNumber(realEstateValue)}</h2>
             {realEstate.map((property, index) => (
               <div key={index} className="asset-container">
                 <span onClick={() => deleteAsset('realEstate', index)}>
@@ -377,7 +386,47 @@ function App() {
 
           {/* Bitcoin Section */}
           <div className="category" style={{ backgroundColor: colors.bitcoin }}>
-            <h2 style={{ marginBottom: '1rem' }}>Bitcoin - ${formatNumber(btcValue)}</h2>
+          {inSimulationMode ? (
+            <div className="simulated-bitcoin-display">
+              <h2>Simulated Bitcoin Value - {formatNumber(btcValue)}</h2>
+              <p>{formatNumber(simulatedBtc.amount)} BTC @ ${formatNumber(simulatedBtc.price)} each</p>
+              <p>Adjusted BTC Price: ${formatNumber(simulatedBtc.price)}</p>
+              <div className="simulation-slider">
+              <Slider
+                min={0}
+                max={400}
+                value={sliderValue}
+                step={1}
+                onChange={(newValue) => {
+                  setSliderValue(newValue);
+                  handleSliderChange(newValue);
+                }}
+                handle={{
+                  style: {
+                    backgroundColor: 'red',
+                    borderColor: 'red',
+                    height: '1.25em',
+                    width: '1.25em',
+                  },
+                }}
+                track={{
+                  style: {
+                    backgroundColor: 'blue',
+                    height: '0.3em',
+                  },
+                }}
+                rail={{
+                  style: {
+                    backgroundColor: 'gray',
+                    height: '0.3em',
+                  },
+                }}
+              />
+              </div>
+            </div>
+        ) : (
+          <>
+            <h2 style={{ marginBottom: '1rem' }}>Bitcoin Value - ${formatNumber(btcValue)}</h2>
             {btcValue > 0 ? (
               <div className="asset-container">
                 <span onClick={() => deleteAsset('bitcoin')}>
@@ -435,11 +484,13 @@ function App() {
                 )}
               </div>
             )}
+          </>
+          )}
           </div>
 
           {/* Cash Section */}
           <div className="category" style={{ backgroundColor: colors.cash }}>
-            <h2 style={{ marginBottom: '1rem' }}>Cash - ${formatNumber(cash)}</h2>
+            <h2 style={{ marginBottom: '1rem' }}>Fiat Value - ${formatNumber(cash)}</h2>
             {cash > 0 ? (
               <div className="asset-container">
                 <span onClick={() => deleteAsset('cash')}>
@@ -498,53 +549,9 @@ function App() {
             {inSimulationMode ? 'Exit Simulation' : 'Simulation Mode'}
           </button>
         </div>
-        {inSimulationMode ? (
-          <div className="simulated-bitcoin-display">
-            <h2>Bitcoin in Simulation</h2>
-            <p>{formatNumber(simulatedBtc.amount)} BTC @ ${formatNumber(simulatedBtc.price)} each</p>
-            <p>Adjusted BTC Price: ${formatNumber(simulatedBtc.price)}</p>
-            <div className="btc-slider">
-            <Slider
-              // min={0}
-              min={0}
-              max={400}
-              value={sliderValue}
-              step={1}
-              onChange={(newValue) => {
-                setSliderValue(newValue);
-                // const adjustedValue = logScaleValue(newValue);
-                // setBtcPrice(btcAmount * (btcPrice * adjustedValue)); // Adjust price based on the transformed value
-                handleSliderChange(newValue);
-              }}
-              handle={{
-                style: {
-                  backgroundColor: 'red',
-                  borderColor: 'red',
-                  height: '1.25em',
-                  width: '1.25em',
-                },
-              }}
-              track={{
-                style: {
-                  backgroundColor: 'blue',
-                  height: '0.3em',
-                },
-              }}
-              rail={{
-                style: {
-                  backgroundColor: 'gray',
-                  height: '0.3em',
-                },
-              }}
-            />
-            </div>
-          </div>
-        ) : (
-          <div className="main-content">
-            {/* Full portfolio goes here (stocks, real estate, etc.) */}
-          </div>
-        )}
+        
         <div className="pie-chart">
+          <h1>Breakdown by Asset Class</h1>
           <Pie data={pieData} />
         </div>
       </div>
