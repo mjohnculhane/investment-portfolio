@@ -20,14 +20,13 @@ function App() {
   // Simulation portfolio variables
   const [inSimulationMode, setInSimulationMode] = useState(false);
   const [simulatedBtc, setSimulatedBtc] = useState({ amount: 0, price: 0 });
-  const [sliderValue, setSliderValue] = useState(100);
+  const [btcSliderValue, setBtcSliderValue] = useState(200);
 
   // References for input fields
   const stockNameRef = useRef(null);
   const realEstateNameRef = useRef(null);
   const btcAmountRef = useRef(null);
   const cashRef = useRef(null);
-
 
   // Form states for each category
   const [stocksFormData, setStocksFormData] = useState({});
@@ -202,21 +201,19 @@ function App() {
   // Simulation mode functions
   const handleSimulationToggle = () => {
     setInSimulationMode((prevMode) => {
+      // Entering simulation mode
       if (!prevMode) {
         // Capture Bitcoin details when entering simulation mode
-        setSimulatedBtc({ amount: btcAmount, price: btcPrice });
+        handleSliderChange(btcSliderValue);
       }
       return !prevMode;
     });
   };
 
   const handleSliderChange = (value) => {
-    setSliderValue(value);
+    setBtcSliderValue(value);
     let adjustedSliderValue = getLogScaledValue(value)
     let newSimulatedPrice = btcPrice * adjustedSliderValue;
-    console.log("original slide value" + value);
-    console.log("adjusted slide value" + adjustedSliderValue);
-    console.log("new simulation price" + newSimulatedPrice);
     setSimulatedBtc({ amount: btcAmount, price: newSimulatedPrice });
   };
 
@@ -395,30 +392,31 @@ function App() {
               <Slider
                 min={0}
                 max={400}
-                value={sliderValue}
+                value={btcSliderValue}
                 step={1}
                 onChange={(newValue) => {
-                  setSliderValue(newValue);
                   handleSliderChange(newValue);
                 }}
-                handle={{
-                  style: {
-                    backgroundColor: 'red',
-                    borderColor: 'red',
-                    height: '1.25em',
-                    width: '1.25em',
-                  },
-                }}
+                // handle={{
+                //   style: {
+                //     backgroundColor: 'red',
+                //     borderColor: 'red',
+                //     height: '1.25em',
+                //     width: '1.25em',
+                //   },
+                // }}
                 track={{
                   style: {
-                    backgroundColor: 'blue',
-                    height: '0.3em',
+                    background: 'linear-gradient(to right, #4CAF50, #2196F3)', // Gradient for the track
+                    height: '0.4em', // Slightly taller for emphasis
+                    borderRadius: '0.2em', // Rounded edges
                   },
                 }}
                 rail={{
                   style: {
-                    backgroundColor: 'gray',
-                    height: '0.3em',
+                    backgroundColor: '#E0E0E0', // Neutral light gray
+                    height: '0.4em',
+                    borderRadius: '0.2em', // Rounded edges
                   },
                 }}
               />
