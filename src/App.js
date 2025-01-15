@@ -168,6 +168,7 @@ function App() {
     } else if (category === 'realEstate') {
       setRealEstate(realEstate.filter((_, i) => i !== index));
     } else if (category === 'bitcoin') {
+      setBtcSliderValue(200);
       setBtcAmount(0);
       setBtcPrice(0);
       setShowBtcForm(false);
