@@ -384,43 +384,73 @@ function App() {
 
           {/* Bitcoin Section */}
           <div className="category" style={{ backgroundColor: colors.bitcoin }}>
-          {inSimulationMode ? (
-            <div className="simulated-bitcoin-display">
-              <h2>Simulated Bitcoin Value - {formatNumber(btcValue)}</h2>
-              <p>{formatNumber(simulatedBtc.amount)} BTC @ ${formatNumber(simulatedBtc.price)} each</p>
-              <p>Adjusted BTC Price: ${formatNumber(simulatedBtc.price)}</p>
-              <div className="simulation-slider">
-              <Slider
-                min={0}
-                max={400}
-                value={btcSliderValue}
-                step={1}
-                onChange={(newValue) => {
-                  handleSliderChange(newValue);
-                }}
-                // handle={{
-                //   style: {
-                //     backgroundColor: 'red',
-                //     borderColor: 'red',
-                //     height: '1.25em',
-                //     width: '1.25em',
-                //   },
-                // }}
-                track={{
-                  style: {
-                    background: 'linear-gradient(to right, #4CAF50, #2196F3)', // Gradient for the track
-                    height: '0.4em', // Slightly taller for emphasis
-                    borderRadius: '0.2em', // Rounded edges
-                  },
-                }}
-                rail={{
-                  style: {
-                    backgroundColor: '#E0E0E0', // Neutral light gray
-                    height: '0.4em',
-                    borderRadius: '0.2em', // Rounded edges
-                  },
-                }}
-              />
+            {inSimulationMode ? (
+              <div className="simulated-bitcoin-display">
+                <h2>Simulated Bitcoin Value - {formatNumber(btcValue)}</h2>
+                <p>{formatNumber(simulatedBtc.amount)} BTC @ ${formatNumber(simulatedBtc.price)} each</p>
+                <p>Adjusted BTC Price: ${formatNumber(simulatedBtc.price)}</p>
+                
+                {/* Simulation Slider */}
+                <div className="simulation-slider">
+                <Slider
+                  min={0}
+                  max={400}
+                  value={btcSliderValue}
+                  step={1}
+                  onChange={(newValue) => {
+                    handleSliderChange(newValue);
+                  }}
+                  // handle={{
+                  //   style: {
+                  //     backgroundColor: 'red',
+                  //     borderColor: 'red',
+                  //     height: '1.25em',
+                  //     width: '1.25em',
+                  //   },
+                  // }}
+                  track={{
+                    style: {
+                      background: 'linear-gradient(to right, #4CAF50, #2196F3)', // Gradient for the track
+                      height: '0.4em', // Slightly taller for emphasis
+                      borderRadius: '0.2em', // Rounded edges
+                    },
+                  }}
+                  rail={{
+                    style: {
+                      backgroundColor: '#E0E0E0', // Neutral light gray
+                      height: '0.4em',
+                      borderRadius: '0.2em', // Rounded edges
+                    },
+                  }}
+                />
+                {/* Manual Price Input */}
+                <div className="manual-price-input" style={{ marginTop: '1rem' }}>
+                  <label htmlFor="btc-price-input" style={{ display: 'block', marginBottom: '0.5rem' }}>
+                    Or Enter BTC Price:
+                  </label>
+                  <input
+                    id="btc-price-input"
+                    type="number"
+                    // value={simulatedBtc.price === "" ? "" : formatNumber(simulatedBtc.price)}
+                    value={simulatedBtc.price}
+                    onChange={(e) => {
+                      const newPrice = parseFloat(e.target.value);
+                      if (!isNaN(newPrice)) {
+                        setSimulatedBtc((prev) => ({
+                          ...prev,
+                          price: newPrice,
+                        }));
+                      }
+                    }}
+                    style={{
+                      padding: '0.5rem',
+                      fontSize: '1rem',
+                      borderRadius: '0.2rem',
+                      border: '1px solid #ccc',
+                      width: '6rem',
+                    }}
+                  />
+                </div>
               </div>
             </div>
         ) : (
